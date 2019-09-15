@@ -77,12 +77,23 @@ int main(void)
 	unsigned int ibo;
 	GLCall(glGenBuffers(1, &ibo));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
+
+	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	
-	ShaderProgramSource src = ParseShaderSourceFile("res/shaders/basic.shader");	
+	unsigned int ibo2;
+	GLCall(glGenBuffers(1, &ibo2));
+	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo2));
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(unsigned int), &indices[6], GL_STATIC_DRAW));
+	
+	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
+	ShaderProgramSource src = ParseShaderSourceFile("res/shaders/basic.shader");
 	unsigned int shaderProgram = CreateShaderProgram(src.vertexShaderSource, src.fragmentShaderSource);
-	GLCall(glUseProgram(shaderProgram));
-	
+
+	ShaderProgramSource snd = ParseShaderSourceFile("res/shaders/simple.fs");
+	unsigned int sndProgram = CreateShaderProgram(src.vertexShaderSource, snd.fragmentShaderSource);
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
@@ -90,9 +101,14 @@ int main(void)
 		GLCall(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
 		GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-		GLCall(glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(indices[0]), GL_UNSIGNED_INT, nullptr));
+		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+		GLCall(glUseProgram(shaderProgram));
+		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 		
-		
+		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo2));
+		GLCall(glUseProgram(sndProgram));
+		GLCall(glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr));
+
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 
@@ -180,9 +196,12 @@ static unsigned int CreateShaderProgram(const std::string& vertexSource, const s
 }
 static ShaderProgramSource ParseShaderSourceFile(const std::string& filepath) {
 	std::ifstream stream(filepath);
+	if (stream.fail()) std::cout << "Error: File path cannot be found!" << std::endl;
+	
 	enum ShaderType {
 		NONE = -1, VERTEX = 0, FRAGMENT = 1
 	};
+	
 	std::string line;
 	std::stringstream ss[2];
 	ShaderType type = ShaderType::NONE;
