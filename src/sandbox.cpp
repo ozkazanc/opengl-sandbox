@@ -2,11 +2,19 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
 
 #define ASSERT(x) if(!(x)) __debugbreak()
 #define GLCall(x) GLClearError();\
 x;\
 ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+struct ShaderProgramSource {
+	std::string vertexShaderSource;
+	std::string fragmentShaderSource;
+};
 
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -15,19 +23,7 @@ void GLClearError();
 bool GLLogCall(const char* funcName, const char* file, int line);
 unsigned int CompileShader(unsigned int type, const std::string& source);
 unsigned int CreateShaderProgram(const std::string& vertexSource, const std::string& fragmentSource);
-
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\0";
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 color;\n"
-"void main()\n"
-"{\n"
-"   color = vec4(0.4f, 0.8f, 0.5f, 1.0f);\n"
-"}\n\0";
+ShaderProgramSource ParseShaderSourceFile(const std::string& filepath);
 
 int main(void)
 {
@@ -59,9 +55,17 @@ int main(void)
 	float positions[] = {
 		-0.5f, -0.5f,
 		 0.5f, -0.5f,
-		 0.0f,  0.5f
+		 0.5f,  0.5f,
+		-0.5f,  0.5f,
+		1.0f,1.0f,
+		0.75f,0.75f,
+		1.0f,0.75f
 	};
-
+	unsigned int indices[]{
+		0, 1, 2,
+		2, 3, 0,
+		4,5,6
+	};
 	unsigned int vbo;
 	GLCall(glGenBuffers(1, &vbo));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER,vbo));
@@ -70,16 +74,23 @@ int main(void)
 	GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * sizeof(float), (void*)0));
 	GLCall(glEnableVertexAttribArray(0));
 
-	unsigned int shaderProgram = CreateShaderProgram(vertexShaderSource, fragmentShaderSource);
+	unsigned int ibo;
+	GLCall(glGenBuffers(1, &ibo));
+	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
+	
+	ShaderProgramSource src = ParseShaderSourceFile("res/shaders/basic.shader");	
+	unsigned int shaderProgram = CreateShaderProgram(src.vertexShaderSource, src.fragmentShaderSource);
 	GLCall(glUseProgram(shaderProgram));
+	
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
 		/* Render here */
-		GLCall(glClearColor(0.9f, 0.5f, 0.5f, 1.0f));
+		GLCall(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
 		GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-		GLCall(glDrawArrays(GL_TRIANGLES, 0, 3));
+		GLCall(glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(indices[0]), GL_UNSIGNED_INT, nullptr));
 		
 		
 		/* Swap front and back buffers */
@@ -88,7 +99,8 @@ int main(void)
 		/* Poll for and process events */
 		glfwPollEvents();
 	}
-
+	GLCall(glDeleteProgram(shaderProgram));
+	
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
@@ -165,5 +177,29 @@ static unsigned int CreateShaderProgram(const std::string& vertexSource, const s
 	GLCall(glDeleteShader(fs));
 
 	return program;
+}
+static ShaderProgramSource ParseShaderSourceFile(const std::string& filepath) {
+	std::ifstream stream(filepath);
+	enum ShaderType {
+		NONE = -1, VERTEX = 0, FRAGMENT = 1
+	};
+	std::string line;
+	std::stringstream ss[2];
+	ShaderType type = ShaderType::NONE;
+	
+	while (getline(stream, line)) {
+		if (line.find("#shader") != std::string::npos) {
+			if (line.find("vertex") != std::string::npos) {
+				type = ShaderType::VERTEX;
+			}
+			else if (line.find("fragment") != std::string::npos) {
+				type = ShaderType::FRAGMENT;
+			}
+		}
+		else {
+			ss[(int)type] << line << '\n';
+		}
+	}
+	return { ss[0].str(), ss[1].str() };
 }
 
