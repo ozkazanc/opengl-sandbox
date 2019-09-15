@@ -9,6 +9,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 struct ShaderProgramSource {
 	std::string vertexShaderSource;
@@ -45,20 +46,23 @@ int main(void)
 	}
 	glfwSetFramebufferSizeCallback(window, GLFWFramebufferSizeCallback);
 	glfwSetKeyCallback(window, GLFWKeyCallback);
+	
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
-	// Initialize glew after the current context
+	
+	// Initialize glew after getting a valid OpengGL context
 	if (glewInit() != GLEW_OK)
 		std::cout << "Error" << std::endl;
 
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
+	// This scope is here to ensure all stack allocated class objects (vertex buffers, index buffers, etc.) are destroyed before glfwTerminate() is called
 	{
-		float positions[] = {
-			-0.5f, -0.5f,
-			 0.5f, -0.5f,
-			 0.5f,  0.5f,
-			-0.5f,  0.5f,
+		float vertices[] = {
+			-0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.0f, 0.0f
 		};
 		unsigned int indices[]{
 			0, 1, 2,
@@ -68,24 +72,29 @@ int main(void)
 		unsigned int vao;
 		GLCall(glGenVertexArrays(1, &vao));
 		GLCall(glBindVertexArray(vao));
-	
-		VertexBuffer vbo(positions, 4 * 2 * sizeof(float));
-
-		GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * sizeof(float), (void*)0));
-		GLCall(glEnableVertexAttribArray(0));
+		
+		VertexArray va;
+		VertexBuffer vb(vertices, 4 * 5 * sizeof(float));	//2 for position, 3 for color
+		VertexBufferLayout layout;
+		
+		layout.PushAttrib<float>(2);	//position attribute		
+		layout.PushAttrib<float>(3);	//color attribute
+		
+		va.AddBufferLayout(vb, layout);
 
 		IndexBuffer ibo(indices, 6);
 
 		// Unbind all buffers
-		vbo.Unbind();
+		vb.Unbind();
 		ibo.Unbind();
-		GLCall(glBindVertexArray(0));
+		va.Unbind();
 
 		ShaderProgramSource src = ParseShaderSourceFile("res/shaders/basic.shader");
 		unsigned int shaderProgram = CreateShaderProgram(src.vertexShaderSource, src.fragmentShaderSource);
 
 		GLCall(int vertexColorLocation = glGetUniformLocation(shaderProgram, "u_Color"));
 		ASSERT(vertexColorLocation != -1);
+		
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
@@ -93,15 +102,17 @@ int main(void)
 			GLCall(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
 			GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-			// update the uniform color
+			// Update the uniform color
+			float T = 0.5;
 			float timeValue = glfwGetTime();
-			float redValue = sin(timeValue) / 2.0f + 0.5f;
-			float blueValue = cos(timeValue) / 2.0f + 0.5f;
-
+			float redValue = sin(timeValue * T) / 2.0f + 0.5f;
+			float greenValue = sin(timeValue * T) / 2.0f + 0.5f;
+			float blueValue = cos(timeValue * T) / 2.0f + 0.5f;
+			
 			GLCall(glUseProgram(shaderProgram));
-			GLCall(glUniform4f(vertexColorLocation, redValue, 0.0f, blueValue, 1.0f));
+			GLCall(glUniform4f(vertexColorLocation, redValue, greenValue, blueValue, 1.0f));
 
-			GLCall(glBindVertexArray(vao));
+			va.Bind();
 			ibo.Bind();
 
 			//GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
