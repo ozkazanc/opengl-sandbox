@@ -3,6 +3,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include "Renderer.h"
+
 struct VertexLayoutElements {
 	unsigned int type;
 	unsigned int count;

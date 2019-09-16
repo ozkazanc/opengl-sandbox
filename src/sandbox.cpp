@@ -7,12 +7,12 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
+#include "VertexBufferLayout.h"
 #include "Shader.h"
 
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
 
 int main(void)
 {
@@ -62,32 +62,31 @@ int main(void)
 		};
 
 		VertexArray va;
+
 		VertexBuffer vb(vertices, 4 * 5 * sizeof(float));	//2 for position, 3 for color
 		VertexBufferLayout layout;
-		
 		layout.PushAttrib<float>(2);	//position attribute		
 		layout.PushAttrib<float>(3);	//color attribute
 		
 		va.AddBufferLayout(vb, layout);
 
-		IndexBuffer ibo(indices, 6);
-
+		IndexBuffer ib(indices, 6);
 
 		Shader shaderProgram("res/shaders/basic.shader");
 		//Shader shaderProgram("res/shaders/simple.vs", "res/shaders/simple.fs");
 				
 		// Unbind everything
 		vb.Unbind();
-		ibo.Unbind();
+		ib.Unbind();
 		va.Unbind();
 		shaderProgram.Unbind();
 
+		Renderer renderer;
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
 			/* Render here */
-			GLCall(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
-			GLCall(glClear(GL_COLOR_BUFFER_BIT));
+			renderer.Clear();
 
 			// Update the uniform color
 			float T = 0.5;
@@ -99,11 +98,7 @@ int main(void)
 			shaderProgram.Bind();
 			shaderProgram.SetUniform4f("u_Color", redValue, greenValue, blueValue, 1.0f);
 			
-			va.Bind();
-			ibo.Bind();
-
-			//GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+			renderer.Draw(va, ib, shaderProgram);
 
 			/* Swap front and back buffers */
 			glfwSwapBuffers(window);
