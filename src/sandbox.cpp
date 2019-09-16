@@ -3,93 +3,135 @@
 
 #include <iostream>
 
-#define ASSERT(x) if(!(x)) __debugbreak()
-#define GLCall(x) GLClearError();\
-	x;\
-	ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+#include "Renderer.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "VertexArray.h"
+#include "Shader.h"
 
 void GLFWErrorCallback(int error, const char* msg);
-void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
+void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-void GLClearError();
-bool GLLogCall(const char* funcName, const char* file, int line);
 
 int main(void)
 {
 	GLFWwindow* window;
 
 	glfwSetErrorCallback(GLFWErrorCallback);
-	
+
 	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
 
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(640, 480, "Hello OpenGL", NULL, NULL);
-	if (!window) {
+
+	if (!window)
+	{
 		glfwTerminate();
 		return -1;
 	}
-
-	glfwSetKeyCallback(window, GLFWKeyCallback);
 	glfwSetFramebufferSizeCallback(window, GLFWFramebufferSizeCallback);
-
+	glfwSetKeyCallback(window, GLFWKeyCallback);
+	
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
-
-	//have to call glewInit after having a valid OpenGl context
+	
+	// Initialize glew after getting a valid OpengGL context
 	if (glewInit() != GLEW_OK)
 		std::cout << "Error" << std::endl;
 
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
-	/* Loop until the user closes the window */
-	while (!glfwWindowShouldClose(window))
+	// This scope is here to ensure all stack allocated class objects (vertex buffers, index buffers, etc.) are destroyed before glfwTerminate() is called
 	{
-		/* Render here */
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		float vertices[] = {
+			-0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.0f, 0.0f
+		};
+		unsigned int indices[]{
+			0, 1, 2,
+			2, 3, 0,
+		};
 
-		GLCall(glBegin(GL_TRIANGLES));
-		glVertex2f(-0.5f, -0.5f);
-		glVertex2f(0.5f, -0.5f);
-		glVertex2f(0, 0.5f);
-		glEnd();
+		VertexArray va;
+		VertexBuffer vb(vertices, 4 * 5 * sizeof(float));	//2 for position, 3 for color
+		VertexBufferLayout layout;
 		
-		/* Swap front and back buffers */
-		glfwSwapBuffers(window);
+		layout.PushAttrib<float>(2);	//position attribute		
+		layout.PushAttrib<float>(3);	//color attribute
+		
+		va.AddBufferLayout(vb, layout);
 
-		/* Poll for and process events */
-		glfwPollEvents();
-	}
+		IndexBuffer ibo(indices, 6);
+
+
+		Shader shaderProgram("res/shaders/basic.shader");
+		//Shader shaderProgram("res/shaders/simple.vs", "res/shaders/simple.fs");
+				
+		// Unbind everything
+		vb.Unbind();
+		ibo.Unbind();
+		va.Unbind();
+		shaderProgram.Unbind();
+
+		/* Loop until the user closes the window */
+		while (!glfwWindowShouldClose(window))
+		{
+			/* Render here */
+			GLCall(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
+			GLCall(glClear(GL_COLOR_BUFFER_BIT));
+
+			// Update the uniform color
+			float T = 0.5;
+			float timeValue = glfwGetTime();
+			float redValue = sin(timeValue * T) / 2.0f + 0.5f;
+			float greenValue = sin(timeValue * T) / 2.0f + 0.5f;
+			float blueValue = cos(timeValue * T) / 2.0f + 0.5f;
 	
+			shaderProgram.Bind();
+			shaderProgram.SetUniform4f("u_Color", redValue, greenValue, blueValue, 1.0f);
+			
+			va.Bind();
+			ibo.Bind();
+
+			//GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+			/* Swap front and back buffers */
+			glfwSwapBuffers(window);
+
+			/* Poll for and process events */
+			glfwPollEvents();
+		}
+	}
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
 }
-static void GLClearError(){
-	while (glGetError() != GL_NO_ERROR);
+
+static void GLFWErrorCallback(int error, const char *msg) {
+	fprintf(stderr, "[Glfw Error]: %s\n", msg);
 }
-static bool GLLogCall(const char* funcName, const char* file, int line){
-	while (unsigned int error = glGetError()){
-		std::cout << "[OpenGL Error](" << error << ") - "<<
-			"In function: " << funcName << ", line: " << line << ", in: " << file << std::endl;
-		return false;
-	}
-	return true;
-}
-static void GLFWErrorCallback(int error, const char* msg){
-	fprintf(stderr, "Error: %s\n", msg);
-}
-static void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
-	//close the window if Escape is pressed
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-}
+
 static void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
 	// make sure the viewport matches the new window dimensions; note that width and 
 	// height will be significantly larger than specified on retina displays.
 	glViewport(0, 0, width, height);
 }
+
+static void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	//Close the window is Escape key is pressed
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+}
+
