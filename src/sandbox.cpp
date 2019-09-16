@@ -2,9 +2,6 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
-//#include <sstream>
-//#include <fstream>
-//#include <string>
 
 #include "Renderer.h"
 #include "VertexBuffer.h"
@@ -60,7 +57,7 @@ int main(void)
 			0, 1, 2,
 			2, 3, 0,
 		};
-		
+
 		VertexArray va;
 		VertexBuffer vb(vertices, 4 * 5 * sizeof(float));	//2 for position, 3 for color
 		VertexBufferLayout layout;
@@ -72,17 +69,16 @@ int main(void)
 
 		IndexBuffer ibo(indices, 6);
 
-		// Unbind all buffers
-		vb.Unbind();
-		ibo.Unbind();
-		va.Unbind();
 
 		Shader shaderProgram("res/shaders/basic.shader");
 		//Shader shaderProgram("res/shaders/simple.vs", "res/shaders/simple.fs");
-		
-		//GLCall(int vertexColorLocation = glGetUniformLocation(shaderProgram, "u_Color"));
-		//ASSERT(vertexColorLocation != -1);
-		
+				
+		// Unbind everything
+		vb.Unbind();
+		ibo.Unbind();
+		va.Unbind();
+		shaderProgram.Unbind();
+
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
@@ -96,9 +92,10 @@ int main(void)
 			float redValue = sin(timeValue * T) / 2.0f + 0.5f;
 			float greenValue = sin(timeValue * T) / 2.0f + 0.5f;
 			float blueValue = cos(timeValue * T) / 2.0f + 0.5f;
+	
+			shaderProgram.Bind();
+			shaderProgram.SetUniform4f("u_Color", redValue, greenValue, blueValue, 1.0f);
 			
-			//GLCall(glUniform4f(vertexColorLocation, redValue, greenValue, blueValue, 1.0f));
-			shaderProgram.Use();
 			va.Bind();
 			ibo.Bind();
 
@@ -134,17 +131,5 @@ static void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int actio
 	//Close the window is Escape key is pressed
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-}
-
-static unsigned int CompileShader(unsigned int type, const std::string& source) {
-	
-}
-
-static unsigned int CreateShaderProgram(const std::string& vertexSource, const std::string& fragmentSource) {
-	
-}
-
-static ShaderProgramSource ParseShaderSourceFile(const std::string& filepath) {
-	
 }
 

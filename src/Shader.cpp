@@ -6,23 +6,57 @@
 #include <fstream>
 #include <sstream>
 
-Shader::Shader(const std::string& filepath) {
+Shader::Shader(const std::string& filepath) 
+	:m_Filepath(filepath), 
+	 m_RendererID(0)
+{
 	ShaderProgramSource src = ParseShaderSourceFile(filepath);
-	m_ShaderID = CreateShaderProgram(src.vertexShaderSource, src.fragmentShaderSource);
+	m_RendererID = CreateShaderProgram(src.vertexShaderSource, src.fragmentShaderSource);
 }
 
-Shader::Shader(const std::string& vertexFilepath, const std::string& fragmentFilepath) {
+Shader::Shader(const std::string& vertexFilepath, const std::string& fragmentFilepath) 
+	:m_Filepath(vertexFilepath + " & " + fragmentFilepath),
+	 m_RendererID(0)
+{
 	ShaderProgramSource first = ParseShaderSourceFile(vertexFilepath);
 	ShaderProgramSource second = ParseShaderSourceFile(fragmentFilepath);
 
-	m_ShaderID = CreateShaderProgram(first.vertexShaderSource, second.fragmentShaderSource);
+	m_RendererID = CreateShaderProgram(first.vertexShaderSource, second.fragmentShaderSource);
 }
 
 Shader::~Shader() {
-	GLCall(glDeleteProgram(m_ShaderID));
+	GLCall(glDeleteProgram(m_RendererID));
 }
-void Shader::Use() {
-	GLCall(glUseProgram(m_ShaderID));
+
+void Shader::Bind() const {
+	GLCall(glUseProgram(m_RendererID));
+}
+
+void Shader::Unbind() const {
+	GLCall(glUseProgram(0));
+}
+
+void Shader::SetUniform1f(const std::string& name, float value) {
+	GLCall(glUniform1f(GetUniformLocation(name), value));
+}
+
+void Shader::SetUniform4f(const std::string& name, float x, float y, float z, float w) {
+	GLCall(glUniform4f(GetUniformLocation(name), x, y, z, w));
+}
+
+int Shader::GetUniformLocation(const std::string& name) {
+	// Search the cache for the uniform location first
+	if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
+		return m_UniformLocationCache[name];
+
+	GLCall(int location = glGetUniformLocation(m_RendererID, name.c_str()));
+	if (location == -1)
+		std::cout << "Warning: uniform: '" << name << "' doesn't exist!" << std::endl;
+	
+	// Add uniform name to hash table to cache it
+	m_UniformLocationCache[name] = location;
+	
+	return location;
 }
 
 unsigned int Shader::CompileShader(unsigned int type, const std::string& source) {
