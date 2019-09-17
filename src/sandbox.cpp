@@ -9,6 +9,7 @@
 #include "VertexArray.h"
 #include "VertexBufferLayout.h"
 #include "Shader.h"
+#include "Texture.h"
 
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -29,7 +30,7 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(640, 480, "Hello OpenGL", NULL, NULL);
+	window = glfwCreateWindow(720, 480, "Hello OpenGL", NULL, NULL);
 
 	if (!window)
 	{
@@ -51,10 +52,10 @@ int main(void)
 	// This scope is here to ensure all stack allocated class objects (vertex buffers, index buffers, etc.) are destroyed before glfwTerminate() is called
 	{
 		float vertices[] = {
-			-0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-			 0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
-			-0.5f,  0.5f, 0.0f, 0.0f, 0.0f
+			-0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
 		};
 		unsigned int indices[]{
 			0, 1, 2,
@@ -63,10 +64,11 @@ int main(void)
 
 		VertexArray va;
 
-		VertexBuffer vb(vertices, 4 * 5 * sizeof(float));	//2 for position, 3 for color
+		VertexBuffer vb(vertices, 4 * 7 * sizeof(float));	//2 for position, 3 for color, 2 for texture coords
 		VertexBufferLayout layout;
 		layout.PushAttrib<float>(2);	//position attribute		
 		layout.PushAttrib<float>(3);	//color attribute
+		layout.PushAttrib<float>(2);	//texture coordinates
 		
 		va.AddBufferLayout(vb, layout);
 
@@ -75,6 +77,11 @@ int main(void)
 		Shader shaderProgram("res/shaders/basic.shader");
 		//Shader shaderProgram("res/shaders/simple.vs", "res/shaders/simple.fs");
 				
+		Texture texture("res/textures/turkey-flag-icon-256.png");
+		texture.Bind();
+		shaderProgram.Bind();
+		shaderProgram.SetUniform1i("u_TextureSlot", 0); // the slot id should be the same as the slot we bind our texture to
+
 		// Unbind everything
 		vb.Unbind();
 		ib.Unbind();
