@@ -62,6 +62,9 @@ int main(void)
 			2, 3, 0,
 		};
 
+		GLCall(glEnable(GL_BLEND));
+		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
 		VertexArray va;
 
 		VertexBuffer vb(vertices, 4 * 7 * sizeof(float));	//2 for position, 3 for color, 2 for texture coords
@@ -78,6 +81,9 @@ int main(void)
 		//Shader shaderProgram("res/shaders/simple.vs", "res/shaders/simple.fs");
 				
 		Texture texture("res/textures/turkey-flag-icon-256.png");
+		//Texture texture("res/textures/brazil-flag-icon-256.png");
+		//Texture texture("res/textures/OpenGL_170px_June16.png");
+
 		texture.Bind();
 		shaderProgram.Bind();
 		shaderProgram.SetUniform1i("u_TextureSlot", 0); // the slot id should be the same as the slot we bind our texture to
