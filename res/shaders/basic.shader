@@ -8,11 +8,13 @@ layout (location = 2) in vec2 texCoord;
 out vec3 v_Color;
 out vec2 v_TexCoord;
 
+uniform mat4 u_MVP;
+
 void main()
 {
    v_Color = aColor;
    v_TexCoord = texCoord;
-   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+   gl_Position = u_MVP * vec4(aPos.x, aPos.y, aPos.z, 1.0);
 }
 
 #shader fragment

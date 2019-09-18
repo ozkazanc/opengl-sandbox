@@ -11,6 +11,9 @@
 #include "Shader.h"
 #include "Texture.h"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -30,7 +33,7 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(720, 480, "Hello OpenGL", NULL, NULL);
+	window = glfwCreateWindow(640, 480, "Hello OpenGL", NULL, NULL);
 
 	if (!window)
 	{
@@ -77,16 +80,21 @@ int main(void)
 
 		IndexBuffer ib(indices, 6);
 
+		//glm::mat4 proj = glm::ortho(-1.5f, 1.5f, -1.0f, 1.0f, -1.0f, 1.0f);	//3x2 window
+		glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);		//4x3 window
+		
 		Shader shaderProgram("res/shaders/basic.shader");
 		//Shader shaderProgram("res/shaders/simple.vs", "res/shaders/simple.fs");
 				
-		Texture texture("res/textures/turkey-flag-icon-256.png");
-		//Texture texture("res/textures/brazil-flag-icon-256.png");
+		//Texture texture("res/textures/turkey-flag-icon-256.png");
+		Texture texture("res/textures/mario-question-block-128.png");
 		//Texture texture("res/textures/OpenGL_170px_June16.png");
 
 		texture.Bind();
 		shaderProgram.Bind();
 		shaderProgram.SetUniform1i("u_TextureSlot", 0); // the slot id should be the same as the slot we bind our texture to
+		
+		shaderProgram.SetUniformMat4f("u_MVP", proj);
 
 		// Unbind everything
 		vb.Unbind();
