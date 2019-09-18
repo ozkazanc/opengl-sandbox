@@ -11,7 +11,6 @@
 #include "Shader.h"
 #include "Texture.h"
 
-float mixValue = 0.0f;
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -54,9 +53,9 @@ int main(void)
 	{
 		float vertices[] = {
 			-0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f,
-			 0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 2.0f, 2.0f,
-			-0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 2.0f
+			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
 		};
 		unsigned int indices[]{
 			0, 1, 2,
@@ -83,14 +82,11 @@ int main(void)
 				
 		Texture texture("res/textures/turkey-flag-icon-256.png");
 		//Texture texture("res/textures/brazil-flag-icon-256.png");
-		Texture texture2("res/textures/OpenGL_170px_June16.png");
+		//Texture texture("res/textures/OpenGL_170px_June16.png");
 
+		texture.Bind();
 		shaderProgram.Bind();
-		texture.Bind(0);
 		shaderProgram.SetUniform1i("u_TextureSlot", 0); // the slot id should be the same as the slot we bind our texture to
-		
-		texture2.Bind(1);
-		shaderProgram.SetUniform1i("u_TextureSlot2", 1); // the slot id should be the same as the slot we bind our texture to
 
 		// Unbind everything
 		vb.Unbind();
@@ -114,7 +110,6 @@ int main(void)
 	
 			shaderProgram.Bind();
 			shaderProgram.SetUniform4f("u_Color", redValue, greenValue, blueValue, 1.0f);
-			shaderProgram.SetUniform1f("u_MixValue", mixValue);
 			
 			renderer.Draw(va, ib, shaderProgram);
 
@@ -143,16 +138,6 @@ static void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int heigh
 
 static void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (key == GLFW_KEY_UP && action == GLFW_PRESS){
-		mixValue += 0.05f;
-		if (mixValue >= 1.0f)
-			mixValue = 1.0f;
-	}
-	if (key == GLFW_KEY_DOWN && action == GLFW_PRESS){
-		mixValue -= 0.05f;
-		if (mixValue <= 0.0f)
-			mixValue = 0.0f;
-	}
 	//Close the window is Escape key is pressed
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);

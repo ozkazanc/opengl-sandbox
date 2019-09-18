@@ -23,15 +23,12 @@ in vec2 v_TexCoord;
 
 uniform vec4 u_Color;
 uniform sampler2D u_TextureSlot;
-uniform sampler2D u_TextureSlot2;
-uniform float u_MixValue;
 
 out vec4 fragColor;
 
 void main()
 {
 	//fragColor = vec4(v_Color, 1.0) + u_Color / 2.0;
-	//fragColor = texture(u_TextureSlot, v_TexCoord);
-	vec2 temp = vec2(v_TexCoord.x, -v_TexCoord.y);
-	fragColor = mix(texture(u_TextureSlot, v_TexCoord), texture(u_TextureSlot2, temp), u_MixValue);
+	vec4 textColor = texture(u_TextureSlot, v_TexCoord);
+	fragColor = textColor;
 }
