@@ -54,11 +54,17 @@ int main(void)
 
 	// This scope is here to ensure all stack allocated class objects (vertex buffers, index buffers, etc.) are destroyed before glfwTerminate() is called
 	{
+		//float vertices[] = {
+		//	-0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		//	 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+		//	 0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		//	-0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+		//};
 		float vertices[] = {
-			-0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-			 0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-			-0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+			200.0f, 200.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			280.0f, 200.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+			280.0f, 280.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+			200.0f, 280.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
 		};
 		unsigned int indices[]{
 			0, 1, 2,
@@ -80,9 +86,13 @@ int main(void)
 
 		IndexBuffer ib(indices, 6);
 
-		//glm::mat4 proj = glm::ortho(-1.5f, 1.5f, -1.0f, 1.0f, -1.0f, 1.0f);	//3x2 window
-		glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);		//4x3 window
+		//glm::mat4 proj = glm::ortho(-1.5f, 1.5f, -1.0f, 1.0f, -1.0f, 1.0f);				//3x2 window
+		//glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);				//4x3 window
+		glm::mat4 proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);				//640x480 pixel based
+		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 0.0f, 0.0f));	//view/camera matrix
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 100.0f, 0.0f));	//model matrix
 		
+		glm::mat4 mvp = proj * view * model;
 		Shader shaderProgram("res/shaders/basic.shader");
 		//Shader shaderProgram("res/shaders/simple.vs", "res/shaders/simple.fs");
 				
@@ -94,7 +104,7 @@ int main(void)
 		shaderProgram.Bind();
 		shaderProgram.SetUniform1i("u_TextureSlot", 0); // the slot id should be the same as the slot we bind our texture to
 		
-		shaderProgram.SetUniformMat4f("u_MVP", proj);
+		shaderProgram.SetUniformMat4f("u_MVP", mvp);
 
 		// Unbind everything
 		vb.Unbind();
