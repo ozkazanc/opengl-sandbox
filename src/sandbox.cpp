@@ -19,10 +19,15 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include "imgui/imgui_impl_glfw.h"
 
+#include "tests/Test.h"
+#include "tests/ClearColorTest.h"
+
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
+const int g_WindowWidth = 640;
+const int g_WindowHeight = 480;
 int main(void)
 {
 	GLFWwindow* window;
@@ -38,7 +43,7 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(640, 480, "Hello OpenGL", NULL, NULL);
+	window = glfwCreateWindow(g_WindowWidth, g_WindowHeight, "Hello OpenGL", NULL, NULL);
 
 	if (!window)
 	{
@@ -116,6 +121,14 @@ int main(void)
 		glm::vec3 posB(500.0f, 100.0f, 0.0f);
 		glm::vec3 colorA(0.0f);
 		glm::vec3 colorB(0.0f);
+
+
+		test::Test* p_CurrentTest = nullptr;
+		test::TestMenu* p_TestMenu = new test::TestMenu(p_CurrentTest);
+		p_CurrentTest = p_TestMenu;
+
+		p_TestMenu->RegisterTest<test::ColorClearTest>("Clear Color");
+
 		while (!glfwWindowShouldClose(window))
 		{
 			/* Render here */
@@ -125,42 +138,52 @@ int main(void)
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 			
-			glm::mat4 proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);				//640x480 pixel window, ortho proj
-			glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));		//view(camera) matrix
+
+			//glm::mat4 proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);				//640x480 pixel window, ortho proj
+			//glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));		//view(camera) matrix
+			//
+			//{
+			//	//Render the first block
+			//	glm::mat4 model = glm::translate(glm::mat4(1.0f), posA);
+			//	glm::mat4 mvp = proj * view * model;
+			//	
+			//	shaderProgram.Bind();
+			//	shaderProgram.SetUniform3f("u_Color", colorA.x, colorA.y, colorA.z);
+			//	shaderProgram.SetUniformMat4f("u_MVP", mvp);
+			//	renderer.Draw(va, ib, shaderProgram);
+			//}
+			//{
+			//	//Render the second block
+			//	glm::mat4 model = glm::translate(glm::mat4(1.0f), posB);
+			//	glm::mat4 mvp = proj * view * model;
+
+			//	shaderProgram.Bind();
+			//	shaderProgram.SetUniform3f("u_Color", colorB.x, colorB.y, colorB.z);
+			//	shaderProgram.SetUniformMat4f("u_MVP", mvp);
+			//	renderer.Draw(va, ib, shaderProgram);
+			//}
+			//
+
+
+			//ImGui::SliderFloat("XPositionA", &posA.x, 0.0f, 640.0f);
+			//ImGui::SliderFloat("YPositionA", &posA.y, 0.0f, 480.0f);
+			//ImGui::SliderFloat("XPositionB", &posB.x, 0.0f, 640.0f);
+			//ImGui::SliderFloat("YPositionB", &posB.y, 0.0f, 480.0f);
+
+			//ImGui::SliderFloat3("ColorA", glm::value_ptr(colorA), -1.0f, 1.0f);
+			//ImGui::SliderFloat3("ColorB", glm::value_ptr(colorB), -1.0f, 1.0f);
+
+			//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			
-			{
-				//Render the first block
-				glm::mat4 model = glm::translate(glm::mat4(1.0f), posA);
-				glm::mat4 mvp = proj * view * model;
-				
-				shaderProgram.Bind();
-				shaderProgram.SetUniform3f("u_Color", colorA.x, colorA.y, colorA.z);
-				shaderProgram.SetUniformMat4f("u_MVP", mvp);
-				renderer.Draw(va, ib, shaderProgram);
-			}
-			{
-				//Render the second block
-				glm::mat4 model = glm::translate(glm::mat4(1.0f), posB);
-				glm::mat4 mvp = proj * view * model;
-
-				shaderProgram.Bind();
-				shaderProgram.SetUniform3f("u_Color", colorB.x, colorB.y, colorB.z);
-				shaderProgram.SetUniformMat4f("u_MVP", mvp);
-				renderer.Draw(va, ib, shaderProgram);
+			p_CurrentTest->OnUpdate(0.0f);
+			p_CurrentTest->OnRender();
+			if (p_CurrentTest != p_TestMenu && ImGui::Button("<- Back to Menu")){
+				delete p_CurrentTest;
+				p_CurrentTest = p_TestMenu;
 			}
 			
-
-
-			ImGui::SliderFloat("XPositionA", &posA.x, 0.0f, 640.0f);
-			ImGui::SliderFloat("YPositionA", &posA.y, 0.0f, 480.0f);
-			ImGui::SliderFloat("XPositionB", &posB.x, 0.0f, 640.0f);
-			ImGui::SliderFloat("YPositionB", &posB.y, 0.0f, 480.0f);
-
-			ImGui::SliderFloat3("ColorA", glm::value_ptr(colorA), -1.0f, 1.0f);
-			ImGui::SliderFloat3("ColorB", glm::value_ptr(colorB), -1.0f, 1.0f);
-
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
+			
+			p_CurrentTest->OnImGuiRender();
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -171,6 +194,10 @@ int main(void)
 			/* Poll for and process events */
 			glfwPollEvents();
 		}
+		delete p_CurrentTest;
+		if (p_CurrentTest != p_CurrentTest)
+			delete p_TestMenu;
+	
 	}
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
