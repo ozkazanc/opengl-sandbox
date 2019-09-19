@@ -59,17 +59,11 @@ int main(void)
 
 	// This scope is here to ensure all stack allocated class objects (vertex buffers, index buffers, etc.) are destroyed before glfwTerminate() is called
 	{
-		//float vertices[] = {
-		//	-0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		//	 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-		//	 0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-		//	-0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
-		//};
 		float vertices[] = {
-			0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			80.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-			80.0f, 80.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-			0.0f, 80.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+			-40.0f, -40.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			 40.0f, -40.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+			 40.0f,  40.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+			-40.0f,  40.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
 		};
 		unsigned int indices[]{
 			0, 1, 2,
@@ -110,14 +104,18 @@ int main(void)
 
 		Renderer renderer;
 
+		// Set up imgui context
 		ImGui::CreateContext();
 		ImGui::StyleColorsDark();
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 		ImGui_ImplOpenGL3_Init("#version 130");
 
 
-		glm::vec3 pos(0.0f, 100.0f, 0.0f);
 		/* Loop until the user closes the window */
+		glm::vec3 posA(80.0f, 100.0f, 0.0f);
+		glm::vec3 posB(500.0f, 100.0f, 0.0f);
+		glm::vec3 colorA(0.0f);
+		glm::vec3 colorB(0.0f);
 		while (!glfwWindowShouldClose(window))
 		{
 			/* Render here */
@@ -126,32 +124,41 @@ int main(void)
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
-
-
-			// Update the uniform color
-			float T = 0.5;
-			float timeValue = glfwGetTime();
-			float redValue = sin(timeValue * T) / 2.0f + 0.5f;
-			float greenValue = sin(timeValue * T) / 2.0f + 0.5f;
-			float blueValue = cos(timeValue * T) / 2.0f + 0.5f;
-
-			shaderProgram.Bind();
-			shaderProgram.SetUniform4f("u_Color", redValue, greenValue, blueValue, 1.0f);
 			
-			//glm::mat4 proj = glm::ortho(-1.5f, 1.5f, -1.0f, 1.0f, -1.0f, 1.0f);				//3x2 window
-			//glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);				//4x3 window
-			glm::mat4 proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);				//640x480 pixel based
-			//glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 0.0f, 0.0f));	//view/camera matrix
-			glm::mat4 view = glm::mat4(1.0f);
-			glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);	//model matrix
+			glm::mat4 proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);				//640x480 pixel window, ortho proj
+			glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));		//view(camera) matrix
 			
-			glm::mat4 mvp = proj * view * model;
-			shaderProgram.SetUniformMat4f("u_MVP", mvp);
+			{
+				//Render the first block
+				glm::mat4 model = glm::translate(glm::mat4(1.0f), posA);
+				glm::mat4 mvp = proj * view * model;
+				
+				shaderProgram.Bind();
+				shaderProgram.SetUniform3f("u_Color", colorA.x, colorA.y, colorA.z);
+				shaderProgram.SetUniformMat4f("u_MVP", mvp);
+				renderer.Draw(va, ib, shaderProgram);
+			}
+			{
+				//Render the second block
+				glm::mat4 model = glm::translate(glm::mat4(1.0f), posB);
+				glm::mat4 mvp = proj * view * model;
 
-			renderer.Draw(va, ib, shaderProgram);
+				shaderProgram.Bind();
+				shaderProgram.SetUniform3f("u_Color", colorB.x, colorB.y, colorB.z);
+				shaderProgram.SetUniformMat4f("u_MVP", mvp);
+				renderer.Draw(va, ib, shaderProgram);
+			}
+			
 
-			ImGui::SliderFloat("XPosition", &pos.x, 0.0f, 560.0f);
-			ImGui::SliderFloat("YPosition", &pos.y, 0.0f, 400.0f);
+
+			ImGui::SliderFloat("XPositionA", &posA.x, 0.0f, 640.0f);
+			ImGui::SliderFloat("YPositionA", &posA.y, 0.0f, 480.0f);
+			ImGui::SliderFloat("XPositionB", &posB.x, 0.0f, 640.0f);
+			ImGui::SliderFloat("YPositionB", &posB.y, 0.0f, 480.0f);
+
+			ImGui::SliderFloat3("ColorA", glm::value_ptr(colorA), -1.0f, 1.0f);
+			ImGui::SliderFloat3("ColorB", glm::value_ptr(colorB), -1.0f, 1.0f);
+
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
 			ImGui::Render();

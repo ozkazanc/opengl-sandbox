@@ -16,14 +16,14 @@ void main()
    v_TexCoord = texCoord;
    gl_Position = u_MVP * vec4(aPos.x, aPos.y, aPos.z, 1.0);
 }
-
+//=========================================================
 #shader fragment
 #version 330 core
 
 in vec3 v_Color;
 in vec2 v_TexCoord;
 
-uniform vec4 u_Color;
+uniform vec3 u_Color;
 uniform sampler2D u_TextureSlot;
 
 out vec4 fragColor;
@@ -31,6 +31,5 @@ out vec4 fragColor;
 void main()
 {
 	//fragColor = vec4(v_Color, 1.0) + u_Color / 2.0;
-	vec4 textColor = texture(u_TextureSlot, v_TexCoord);
-	fragColor = textColor;
+	fragColor = texture(u_TextureSlot, v_TexCoord) + vec4(u_Color, 1.0f);
 }
