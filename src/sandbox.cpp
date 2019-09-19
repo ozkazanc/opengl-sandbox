@@ -13,6 +13,11 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include "imgui/imgui_impl_glfw.h"
 
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -61,10 +66,10 @@ int main(void)
 		//	-0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
 		//};
 		float vertices[] = {
-			200.0f, 200.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			280.0f, 200.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-			280.0f, 280.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-			200.0f, 280.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+			0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			80.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+			80.0f, 80.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+			0.0f, 80.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
 		};
 		unsigned int indices[]{
 			0, 1, 2,
@@ -85,14 +90,7 @@ int main(void)
 		va.AddBufferLayout(vb, layout);
 
 		IndexBuffer ib(indices, 6);
-
-		//glm::mat4 proj = glm::ortho(-1.5f, 1.5f, -1.0f, 1.0f, -1.0f, 1.0f);				//3x2 window
-		//glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);				//4x3 window
-		glm::mat4 proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);				//640x480 pixel based
-		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 0.0f, 0.0f));	//view/camera matrix
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 100.0f, 0.0f));	//model matrix
 		
-		glm::mat4 mvp = proj * view * model;
 		Shader shaderProgram("res/shaders/basic.shader");
 		//Shader shaderProgram("res/shaders/simple.vs", "res/shaders/simple.fs");
 				
@@ -104,8 +102,6 @@ int main(void)
 		shaderProgram.Bind();
 		shaderProgram.SetUniform1i("u_TextureSlot", 0); // the slot id should be the same as the slot we bind our texture to
 		
-		shaderProgram.SetUniformMat4f("u_MVP", mvp);
-
 		// Unbind everything
 		vb.Unbind();
 		ib.Unbind();
@@ -113,11 +109,24 @@ int main(void)
 		shaderProgram.Unbind();
 
 		Renderer renderer;
+
+		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
+		ImGui_ImplGlfw_InitForOpenGL(window, true);
+		ImGui_ImplOpenGL3_Init("#version 130");
+
+
+		glm::vec3 pos(0.0f, 100.0f, 0.0f);
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
 			/* Render here */
 			renderer.Clear();
+
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
 
 			// Update the uniform color
 			float T = 0.5;
@@ -125,11 +134,29 @@ int main(void)
 			float redValue = sin(timeValue * T) / 2.0f + 0.5f;
 			float greenValue = sin(timeValue * T) / 2.0f + 0.5f;
 			float blueValue = cos(timeValue * T) / 2.0f + 0.5f;
-	
+
 			shaderProgram.Bind();
 			shaderProgram.SetUniform4f("u_Color", redValue, greenValue, blueValue, 1.0f);
 			
+			//glm::mat4 proj = glm::ortho(-1.5f, 1.5f, -1.0f, 1.0f, -1.0f, 1.0f);				//3x2 window
+			//glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);				//4x3 window
+			glm::mat4 proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);				//640x480 pixel based
+			//glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 0.0f, 0.0f));	//view/camera matrix
+			glm::mat4 view = glm::mat4(1.0f);
+			glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);	//model matrix
+			
+			glm::mat4 mvp = proj * view * model;
+			shaderProgram.SetUniformMat4f("u_MVP", mvp);
+
 			renderer.Draw(va, ib, shaderProgram);
+
+			ImGui::SliderFloat("XPosition", &pos.x, 0.0f, 560.0f);
+			ImGui::SliderFloat("YPosition", &pos.y, 0.0f, 400.0f);
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 
 			/* Swap front and back buffers */
 			glfwSwapBuffers(window);
@@ -138,6 +165,10 @@ int main(void)
 			glfwPollEvents();
 		}
 	}
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
