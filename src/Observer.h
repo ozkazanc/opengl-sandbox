@@ -1,3 +1,4 @@
+#pragma once
 
 class Observer{
 	friend class Subject;
@@ -20,7 +21,7 @@ private:
 	Observer* m_Head;
 
 protected:
-	void Notify(int event_);
+	void Notify(int event_) const;
 
 public:
 	Subject()

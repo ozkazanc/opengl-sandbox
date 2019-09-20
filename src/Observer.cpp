@@ -8,14 +8,23 @@ void Subject::AddObserver(Observer* observer){
 }
 
 void Subject::RemoveObserver(Observer* observer){
-	if (observer->m_Prev != nullptr)
-		observer->m_Prev->m_Next = observer->m_Next;
+
+	if (observer->m_Prev == nullptr) {
+		m_Head = observer->m_Next;
+		if (observer->m_Next != nullptr)
+			observer->m_Next->m_Prev = nullptr;
+	}
 	
-	if (observer->m_Next != nullptr)
-		observer->m_Next->m_Prev = observer->m_Prev;
+	else{
+		observer->m_Prev->m_Next = observer->m_Next;
+		if (observer->m_Next != nullptr)
+			observer->m_Next->m_Prev = observer->m_Prev;
+	}
+	observer->m_Next = nullptr;
+	observer->m_Prev = nullptr;
 }
 
-void Subject::Notify(int event_){
+void Subject::Notify(int event_) const{
 	Observer* current = m_Head;
 	while (current != nullptr){
 		current->OnNotify(event_);

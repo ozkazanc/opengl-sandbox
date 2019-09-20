@@ -2,8 +2,10 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <memory>
 
 #include "Renderer.h"
+#include "HandleInput.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -16,10 +18,11 @@
 
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
-void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void GLFWKeyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 const int g_WindowWidth = 640;
 const int g_WindowHeight = 480;
+static HandleInput *gp_InputHandler = new HandleInput();
 int main(void)
 {
 	GLFWwindow* window;
@@ -43,7 +46,7 @@ int main(void)
 		return -1;
 	}
 	glfwSetFramebufferSizeCallback(window, GLFWFramebufferSizeCallback);
-	glfwSetKeyCallback(window, GLFWKeyCallback);
+	glfwSetKeyCallback(window, GLFWKeyCallbackWrapper);
 	
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
@@ -65,12 +68,12 @@ int main(void)
 
 	/* Loop until the user closes the window */
 	test::Test* p_CurrentTest = nullptr;
-	test::TestMenu* p_TestMenu = new test::TestMenu(p_CurrentTest);
+	test::TestMenu* p_TestMenu = new test::TestMenu(p_CurrentTest, gp_InputHandler);
 	p_CurrentTest = p_TestMenu;
 
 	p_TestMenu->RegisterTest<test::ColorClearTest>("Clear Color");
 	p_TestMenu->RegisterTest<test::Texture2DTest>("2D Texture");
-	p_TestMenu->RegisterTest<test::ControlColorWithKeyboardTest>("Contorl Color with Keyboard");
+	p_TestMenu->RegisterTest<test::ControlColorWithKeyboardTest>("Control Color with Keyboard");
 
 	Renderer renderer;
 	while (!glfwWindowShouldClose(window))
@@ -87,6 +90,7 @@ int main(void)
 		p_CurrentTest->OnRender();
 		
 		if (p_CurrentTest != p_TestMenu && ImGui::Button("<- Back to Menu")){
+			gp_InputHandler->RemoveObserver(p_CurrentTest);
 			delete p_CurrentTest;
 			p_CurrentTest = p_TestMenu;
 		}
@@ -105,6 +109,7 @@ int main(void)
 	delete p_CurrentTest;
 	if (p_CurrentTest != p_CurrentTest) //to avoid double freeing
 		delete p_TestMenu;
+	delete gp_InputHandler;
 	
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
@@ -126,10 +131,7 @@ static void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int heigh
 	glViewport(0, 0, width, height);
 }
 
-static void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-	//Close the window is Escape key is pressed
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
+static void GLFWKeyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods){
+	gp_InputHandler->GLFWKeyCallback(window, key, scancode, action, mods);
 }
 

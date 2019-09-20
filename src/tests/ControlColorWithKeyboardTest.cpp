@@ -22,11 +22,13 @@ namespace test{
 	}
 	
 	void ControlColorWithKeyboardTest::OnImGuiRender() {
-		ImGui::Begin("Select the color channel and use up/down arrow keys to ajdust");
+		ImGui::Begin("Select channel and use up/down arrow keys to adjust color");
 		
 		ImGui::Checkbox("R", &m_Channels[0]);
 		ImGui::Checkbox("G", &m_Channels[1]);
 		ImGui::Checkbox("B", &m_Channels[2]);
+		
+		ImGui::Text("R: %d, G: %d, B: %d", int(255 * m_Color[0]), int(255 * m_Color[1]), int(255* m_Color[2]));
 
 		ImGui::End();
 	}
@@ -35,13 +37,13 @@ namespace test{
 		const float increment = 0.05f;
 		for (int i = 0; i < 3; i++){
 
-			if (m_Channels[i] && GLFW_KEY_DOWN){
+			if (m_Channels[i] && event_ == GLFW_KEY_DOWN){
 				m_Color[i] -= increment;
 				if (m_Color[i] < 0.0f)
 					m_Color[i] = 0.0f;
 			}
 			
-			else if (m_Channels[i] && GLFW_KEY_UP){
+			else if (m_Channels[i] && event_ == GLFW_KEY_UP){
 				m_Color[i] += increment;
 				if (m_Color[i] > 1.0f)
 					m_Color[i] = 1.0f;

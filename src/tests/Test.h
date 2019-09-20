@@ -10,8 +10,10 @@
 namespace test{
 
 	class Test :public Observer {
+	protected:
+		Subject* m_Subject;
 	public:
-		Test() {}
+		Test() :m_Subject(nullptr) {}
 		virtual ~Test() {}
 
 		virtual void OnUpdate(float deltaTime) {}
@@ -27,7 +29,7 @@ namespace test{
 		Test*& m_CurrentTest;
 
 	public:
-		TestMenu(Test*& p_CurrentTest);
+		TestMenu(Test*& p_CurrentTest, Subject* const subject);
 		~TestMenu();
 
 		void OnImGuiRender() override;
