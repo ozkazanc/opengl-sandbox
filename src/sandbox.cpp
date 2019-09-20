@@ -12,6 +12,7 @@
 #include "tests/Test.h"
 #include "tests/ClearColorTest.h"
 #include "tests/Texture2DTest.h"
+#include "tests/ControlColorWithKeyboardTest.h"
 
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -69,6 +70,7 @@ int main(void)
 
 	p_TestMenu->RegisterTest<test::ColorClearTest>("Clear Color");
 	p_TestMenu->RegisterTest<test::Texture2DTest>("2D Texture");
+	p_TestMenu->RegisterTest<test::ControlColorWithKeyboardTest>("Contorl Color with Keyboard");
 
 	Renderer renderer;
 	while (!glfwWindowShouldClose(window))

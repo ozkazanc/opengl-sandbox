@@ -5,9 +5,11 @@
 #include <vector>
 #include <functional>
 
+#include "Observer.h"
+
 namespace test{
 
-	class Test {
+	class Test :public Observer {
 	public:
 		Test() {}
 		virtual ~Test() {}
@@ -15,6 +17,8 @@ namespace test{
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnRender() {}
 		virtual void OnImGuiRender() {}
+
+		virtual void OnNotify(int event_) {}
 	};
 
 	class TestMenu : public Test {
