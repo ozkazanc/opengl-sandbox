@@ -6,9 +6,9 @@
 namespace test{
 
 	ColorClearTest::ColorClearTest()
-		//:m_ClearColor {0.6f, 0.6f, 0.3f, 1.0f}
+		:m_ClearColor {0.6f, 0.6f, 0.3f, 1.0f}
 	{
-		m_ClearColor[0] = 0.6f, m_ClearColor[1] = 0.6f, m_ClearColor[2] = 0.3f, m_ClearColor[3] = 1.0f;
+		//m_ClearColor[0] = 0.6f, m_ClearColor[1] = 0.6f, m_ClearColor[2] = 0.3f, m_ClearColor[3] = 1.0f;
 	}
 	ColorClearTest::~ColorClearTest() {}
 
