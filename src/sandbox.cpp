@@ -14,6 +14,7 @@
 #include "tests/Test.h"
 #include "tests/ClearColorTest.h"
 #include "tests/Texture2DTest.h"
+#include "tests/Texture3DTest.h"
 #include "tests/ControlColorWithKeyboardTest.h"
 
 void GLFWErrorCallback(int error, const char* msg);
@@ -74,6 +75,7 @@ int main(void)
 	p_TestMenu->RegisterTest<test::ColorClearTest>("Clear Color");
 	p_TestMenu->RegisterTest<test::Texture2DTest>("2D Texture");
 	p_TestMenu->RegisterTest<test::ControlColorWithKeyboardTest>("Control Color with Keyboard");
+	p_TestMenu->RegisterTest<test::Texture3DTest>("3D Rotating Cube");
 
 	Renderer renderer;
 	while (!glfwWindowShouldClose(window))
