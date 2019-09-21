@@ -19,30 +19,48 @@ namespace test {
 			-0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 
 			 0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
 			 0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-			-0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 
+			-0.5f,  0.5f,  0.5f, 0.0f, 1.0f, //3
 			-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
 			 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
 			 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-			-0.5f,  0.5f, -0.5f, 0.0f, 1.0f
+			-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, //7
+
+			-0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
+			-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, //11
+			-0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+			 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+			-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, //15
+
+			-0.5f, -0.5f,  0.5f, 0.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f, 1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f, 0.0f, 0.0f, //19
+			-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+			 0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
+			-0.5f,  0.5f, -0.5f, 1.0f, 1.0f  //23
 		};
 		unsigned int indices[]{
-			0, 1, 2,
-			2, 3, 0,
-			4, 0, 3,
-			3, 7, 4,
-			5, 4, 7,
-			7, 6, 5,
-			1, 5, 6,
-			6, 2, 1,
-			6, 7, 3,
-			3, 2, 6,
-			1, 0, 4,
-			4, 5, 1
+			 0,  1,  2, //front
+			 2,  3,  0,
+			 4,  8, 11, //left
+			11, 15,  4,		
+			21, 12, 23, //back
+			23, 22, 21,
+			 9, 13, 14, //right
+			14, 10,  9,
+			 6,  7, 19, //top
+			19, 18,  6,
+			17, 16, 20, //bottom
+			20,  5, 17
 		};
 
 		m_VertexArray = std::make_unique<VertexArray>();
 
-		m_VertexBuffer = std::make_unique<VertexBuffer>(vertices, 8 * 5 * sizeof(float));
+		m_VertexBuffer = std::make_unique<VertexBuffer>(vertices, 24 * 5 * sizeof(float));
 
 		m_VertexLayout = std::make_unique<VertexBufferLayout>();
 		m_VertexLayout->PushAttrib<float>(3);	//position attribute		
@@ -63,10 +81,6 @@ namespace test {
 		m_Shader->Bind();
 		m_Shader->SetUniform1i("u_TextureSlot", 0); // the slot id should be the same as the slot we bind our texture to
 
-		m_PosA = glm::vec3(80.0f, 100.0f, 0.0f);
-		m_PosB = glm::vec3(500.0f, 100.0f, 0.0f);
-		m_ColorA = glm::vec3(0.0f);
-		m_ColorB = glm::vec3(0.0f);
 	}
 	Texture3DTest::~Texture3DTest() {}
 
