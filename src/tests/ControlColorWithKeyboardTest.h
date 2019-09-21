@@ -8,6 +8,12 @@ namespace test{
 	private:
 		float m_Color[4];
 		bool m_Channels[3];
+
+		float m_CurrentTime;
+		float m_LastTime;
+		float m_DeltaTime;
+		
+		void SetDeltaTime();
 	public:
 		ControlColorWithKeyboardTest();
 		~ControlColorWithKeyboardTest();

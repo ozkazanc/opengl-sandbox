@@ -1,6 +1,7 @@
 #include "ControlColorWithKeyboardTest.h"
 #include "Renderer.h"
 #include "GL/glew.h"
+#include "GLFW/glfw3.h"
 #include "imgui/imgui.h"
 
 #define GLFW_KEY_DOWN               264
@@ -19,6 +20,7 @@ namespace test{
 	void ControlColorWithKeyboardTest::OnRender() {
 		GLCall(glClearColor(m_Color[0], m_Color[1], m_Color[2], m_Color[3]));
 		GLCall(glClear(GL_COLOR_BUFFER_BIT));
+		SetDeltaTime();
 	}
 	
 	void ControlColorWithKeyboardTest::OnImGuiRender() {
@@ -34,7 +36,7 @@ namespace test{
 	}
 
 	void ControlColorWithKeyboardTest::OnNotify(int event_) {
-		const float increment = 0.05f;
+		const float increment = 0.25f * m_DeltaTime;
 		for (int i = 0; i < 3; i++){
 
 			if (m_Channels[i] && event_ == GLFW_KEY_DOWN){
@@ -51,5 +53,9 @@ namespace test{
 			}	
 		}
 	}
-
+	void ControlColorWithKeyboardTest::SetDeltaTime() {
+		m_CurrentTime = glfwGetTime();
+		m_DeltaTime = m_CurrentTime - m_LastTime;
+		m_LastTime = m_CurrentTime;
+	}
 }

@@ -17,10 +17,12 @@
 #include "tests/Texture3DTest.h"
 #include "tests/Multiple3DModels.h"
 #include "tests/ControlColorWithKeyboardTest.h"
+#include "tests/MoveAround.h"
 
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void GLFWKeyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods);
+void ProcessInput(GLFWwindow* window);
 
 const int g_WindowWidth = 640;
 const int g_WindowHeight = 480;
@@ -48,7 +50,7 @@ int main(void)
 		return -1;
 	}
 	glfwSetFramebufferSizeCallback(window, GLFWFramebufferSizeCallback);
-	glfwSetKeyCallback(window, GLFWKeyCallbackWrapper);
+	//glfwSetKeyCallback(window, GLFWKeyCallbackWrapper);
 	
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
@@ -78,11 +80,12 @@ int main(void)
 	p_TestMenu->RegisterTest<test::ControlColorWithKeyboardTest>("Control Color with Keyboard");
 	p_TestMenu->RegisterTest<test::Texture3DTest>("3D Rotating Cube");
 	p_TestMenu->RegisterTest<test::Multiple3DModels>("Multiple 3D Models");
-
+	p_TestMenu->RegisterTest<test::MoveAround>("Move Camera");
 
 	Renderer renderer;
 	while (!glfwWindowShouldClose(window))
 	{
+		ProcessInput(window);
 		/* Render here */
 		renderer.Clear();
 
@@ -140,3 +143,26 @@ static void GLFWKeyCallbackWrapper(GLFWwindow* window, int key, int scancode, in
 	gp_InputHandler->GLFWKeyCallback(window, key, scancode, action, mods);
 }
 
+static void ProcessInput(GLFWwindow* window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) 
+		gp_InputHandler->GLFWKeyCallback(window, GLFW_KEY_ESCAPE, -1, GLFW_PRESS, -1);	
+	
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) 
+		gp_InputHandler->GLFWKeyCallback(window, GLFW_KEY_DOWN, -1, GLFW_PRESS, -1);	
+	
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) 
+		gp_InputHandler->GLFWKeyCallback(window, GLFW_KEY_UP, -1, GLFW_PRESS, -1);
+	
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		gp_InputHandler->GLFWKeyCallback(window, GLFW_KEY_W, -1, GLFW_PRESS, -1);
+	
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		gp_InputHandler->GLFWKeyCallback(window, GLFW_KEY_S, -1, GLFW_PRESS, -1);
+	
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		gp_InputHandler->GLFWKeyCallback(window, GLFW_KEY_A, -1, GLFW_PRESS, -1);
+	
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		gp_InputHandler->GLFWKeyCallback(window, GLFW_KEY_D, -1, GLFW_PRESS, -1);
+}

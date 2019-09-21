@@ -1,4 +1,4 @@
-#include "Multiple3DModels.h"
+#include "MoveAround.h"
 
 #include "Renderer.h"
 #include "GL/glew.h"
@@ -8,11 +8,12 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 namespace test {
-	Multiple3DModels::Multiple3DModels()
+	MoveAround::MoveAround()
 		:m_Proj(glm::mat4(1.0f)), m_View(glm::mat4(1.0f)), m_Model(glm::mat4(1.0f)),
 		m_VertexBuffer(nullptr), m_VertexLayout(nullptr),
 		m_IndexBuffer(nullptr), m_VertexArray(nullptr),
-		m_Texture(nullptr), m_Shader(nullptr)
+		m_Texture(nullptr), m_Shader(nullptr),
+		m_Camera(nullptr)
 	{
 		float vertices[] = {
 			-0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 
@@ -92,14 +93,18 @@ namespace test {
 			glm::vec3(1.5f,  0.2f, -1.5f),
 			glm::vec3(-1.3f,  1.0f, -1.5f)
 		};
+
+		m_Camera = std::make_unique<Camera>();
 	}
-	Multiple3DModels::~Multiple3DModels() {}
+	MoveAround::~MoveAround() {}
 
-	void Multiple3DModels::OnUpdate(float deltaTime) {}
+	void MoveAround::OnUpdate(float deltaTime) {}
 
-	void Multiple3DModels::OnRender() {
+	void MoveAround::OnRender() {
 		GLCall(glEnable(GL_DEPTH_TEST));
 		GLCall(glClear(GL_DEPTH_BUFFER_BIT));
+
+		m_Camera->SetDeltaTime((float)glfwGetTime());
 
 		//m_Proj = glm::ortho(0.0f, (float)g_WindowWidth, 0.0f, (float)g_WindowHeight, -1.0f, 1.0f);				//640x480 pixel window, ortho proj
 		m_Proj = glm::perspective(glm::radians(45.0f), (float)g_WindowWidth / g_WindowHeight, 0.1f, 100.0f);
@@ -110,9 +115,8 @@ namespace test {
 		float time = (float)glfwGetTime();
 		for (unsigned int i = 0; i < m_Models.size(); i++) {
 
-			m_View = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -10.0f)) 
-				   * glm::rotate(glm::mat4(1.0f), time * glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f));	//view(camera) matrix
-			
+			m_View = m_Camera->GetViewMatrix();
+
 			m_Model = glm::translate(glm::mat4(1.0f), m_Models[i])
 					* glm::rotate(glm::mat4(1.0f), glm::radians(20.0f * i), glm::vec3(0.5f, 1.0f, 0.0f));
 		
@@ -124,20 +128,14 @@ namespace test {
 			renderer.Draw(*m_VertexArray, *m_IndexBuffer, *m_Shader);
 		}
 		
-
 	}
 
-	void Multiple3DModels::OnImGuiRender() {
-		//ImGui::SliderFloat("XPositionA", &m_PosA.x, 0.0f, 640.0f);
-		//ImGui::SliderFloat("YPositionA", &m_PosA.y, 0.0f, 480.0f);
-		//ImGui::SliderFloat("XPositionB", &m_PosB.x, 0.0f, 640.0f);
-		//ImGui::SliderFloat("YPositionB", &m_PosB.y, 0.0f, 480.0f);
-
-		//ImGui::SliderFloat3("ColorA", glm::value_ptr(m_ColorA), -1.0f, 1.0f);
-		//ImGui::SliderFloat3("ColorB", glm::value_ptr(m_ColorB), -1.0f, 1.0f);
-
-		//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	void MoveAround::OnImGuiRender() {
+		ImGui::Begin("Move around the scene with WASD keys.");
+		ImGui::End();
 	}
 
-	void Multiple3DModels::OnNotify(int event_) {}
+	void MoveAround::OnNotify(int event_) {
+		m_Camera->OnNotify(event_);
+	}
 }
