@@ -92,13 +92,16 @@ namespace test {
 			glm::vec3(1.5f,  0.2f, -1.5f),
 			glm::vec3(-1.3f,  1.0f, -1.5f)
 		};
+		
+		GLCall(glEnable(GL_DEPTH_TEST));
 	}
-	Multiple3DModels::~Multiple3DModels() {}
+	Multiple3DModels::~Multiple3DModels() {
+		GLCall(glDisable(GL_DEPTH_TEST));
+	}
 
 	void Multiple3DModels::OnUpdate(float deltaTime) {}
 
 	void Multiple3DModels::OnRender() {
-		GLCall(glEnable(GL_DEPTH_TEST));
 		GLCall(glClear(GL_DEPTH_BUFFER_BIT));
 
 		//m_Proj = glm::ortho(0.0f, (float)g_WindowWidth, 0.0f, (float)g_WindowHeight, -1.0f, 1.0f);				//640x480 pixel window, ortho proj
@@ -127,17 +130,7 @@ namespace test {
 
 	}
 
-	void Multiple3DModels::OnImGuiRender() {
-		//ImGui::SliderFloat("XPositionA", &m_PosA.x, 0.0f, 640.0f);
-		//ImGui::SliderFloat("YPositionA", &m_PosA.y, 0.0f, 480.0f);
-		//ImGui::SliderFloat("XPositionB", &m_PosB.x, 0.0f, 640.0f);
-		//ImGui::SliderFloat("YPositionB", &m_PosB.y, 0.0f, 480.0f);
-
-		//ImGui::SliderFloat3("ColorA", glm::value_ptr(m_ColorA), -1.0f, 1.0f);
-		//ImGui::SliderFloat3("ColorB", glm::value_ptr(m_ColorB), -1.0f, 1.0f);
-
-		//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	}
+	void Multiple3DModels::OnImGuiRender() {}
 
 	void Multiple3DModels::OnNotify(int event_) {}
 }

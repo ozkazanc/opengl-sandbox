@@ -95,10 +95,13 @@ namespace test {
 		};
 
 		m_Camera = std::make_unique<Camera>();
+		GLCall(glEnable(GL_DEPTH_TEST));
 	}
 	MoveAround::~MoveAround() {
 		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		GLCall(glDisable(GL_DEPTH_TEST));
 	}
+	
 	void MoveAround::SetInputMouseInputMode() {
 		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	};
@@ -107,7 +110,6 @@ namespace test {
 
 	void MoveAround::OnRender() {
 
-		GLCall(glEnable(GL_DEPTH_TEST));
 		GLCall(glClear(GL_DEPTH_BUFFER_BIT));
 
 		m_Camera->SetDeltaTime((float)glfwGetTime());

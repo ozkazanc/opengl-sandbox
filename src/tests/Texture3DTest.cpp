@@ -81,13 +81,15 @@ namespace test {
 		m_Shader->Bind();
 		m_Shader->SetUniform1i("u_TextureSlot", 0); // the slot id should be the same as the slot we bind our texture to
 
+		GLCall(glEnable(GL_DEPTH_TEST));
 	}
-	Texture3DTest::~Texture3DTest() {}
+	Texture3DTest::~Texture3DTest() {
+		GLCall(glDisable(GL_DEPTH_TEST));
+	}
 
 	void Texture3DTest::OnUpdate(float deltaTime) {}
 
 	void Texture3DTest::OnRender() {
-		GLCall(glEnable(GL_DEPTH_TEST));
 		GLCall(glClear(GL_DEPTH_BUFFER_BIT));
 
 		//m_Proj = glm::ortho(0.0f, (float)g_WindowWidth, 0.0f, (float)g_WindowHeight, -1.0f, 1.0f);				//640x480 pixel window, ortho proj
