@@ -29,3 +29,7 @@ void HandleInput::GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int
 void HandleInput::MouseCallback(float x, float y, bool scroll) {
 	Notify(x, y, scroll);
 }
+void HandleInput::ScrollCallback(float x, float y) {
+	Notify(x, y, true);
+}
+

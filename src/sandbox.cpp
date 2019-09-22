@@ -22,8 +22,9 @@
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void GLFWKeyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods);
-void ProcessInput(GLFWwindow* window);
+void ProcessInput(GLFWwindow* window, test::Test* &p_CurrentTest, test::TestMenu* p_TestMenu);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
+void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 const int g_WindowWidth = 640;
 const int g_WindowHeight = 480;
@@ -56,6 +57,7 @@ int main(void)
 	glfwSetFramebufferSizeCallback(window, GLFWFramebufferSizeCallback);
 	//glfwSetKeyCallback(window, GLFWKeyCallbackWrapper);
 	glfwSetCursorPosCallback(window, MouseCallback);
+	glfwSetScrollCallback(window, ScrollCallback);
 
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
@@ -90,7 +92,7 @@ int main(void)
 	Renderer renderer;
 	while (!glfwWindowShouldClose(window))
 	{
-		ProcessInput(window);
+		ProcessInput(window, p_CurrentTest, p_TestMenu);
 		/* Render here */
 		renderer.Clear();
 
@@ -101,7 +103,7 @@ int main(void)
 		p_CurrentTest->OnUpdate(0.0f);
 		p_CurrentTest->OnRender();
 		
-		if (p_CurrentTest != p_TestMenu && ImGui::Button("<- Back to Menu")){
+		if (p_CurrentTest != p_TestMenu && ImGui::Button("<- Back to Menu (TAB)")){
 			gp_InputHandler->RemoveObserver(p_CurrentTest);
 			delete p_CurrentTest;
 			p_CurrentTest = p_TestMenu;
@@ -148,7 +150,7 @@ static void GLFWKeyCallbackWrapper(GLFWwindow* window, int key, int scancode, in
 	gp_InputHandler->GLFWKeyCallback(window, key, scancode, action, mods);
 }
 
-static void ProcessInput(GLFWwindow* window)
+static void ProcessInput(GLFWwindow* window, test::Test* &p_CurrentTest, test::TestMenu* p_TestMenu)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) 
 		gp_InputHandler->GLFWKeyCallback(window, GLFW_KEY_ESCAPE, -1, GLFW_PRESS, -1);	
@@ -170,6 +172,14 @@ static void ProcessInput(GLFWwindow* window)
 	
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		gp_InputHandler->GLFWKeyCallback(window, GLFW_KEY_D, -1, GLFW_PRESS, -1);
+
+	if (p_CurrentTest != p_TestMenu && glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS)
+	{
+		gp_InputHandler->RemoveObserver(p_CurrentTest);
+		delete p_CurrentTest;
+		p_CurrentTest = p_TestMenu;
+	}
+	
 }
 void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
@@ -189,5 +199,8 @@ void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 	gf_LastY = yPos_;
 
 	gp_InputHandler->MouseCallback(xOffset, yOffset, false);
-	//camera.ProcessMouseMovement(xOffset, yOffset);
+}
+void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	gp_InputHandler->ScrollCallback((float)xoffset, (float)yoffset);
 }

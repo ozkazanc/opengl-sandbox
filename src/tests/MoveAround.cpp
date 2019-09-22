@@ -112,12 +112,10 @@ namespace test {
 
 		m_Camera->SetDeltaTime((float)glfwGetTime());
 
-		//m_Proj = glm::ortho(0.0f, (float)g_WindowWidth, 0.0f, (float)g_WindowHeight, -1.0f, 1.0f);				//640x480 pixel window, ortho proj
-		m_Proj = glm::perspective(glm::radians(45.0f), (float)g_WindowWidth / g_WindowHeight, 0.1f, 100.0f);
+		m_Proj = glm::perspective(glm::radians(m_Camera->GetZoom()), (float)g_WindowWidth / g_WindowHeight, 0.1f, 100.0f);
 
 		Renderer renderer;
 		
-		//m_Model = glm::translate(glm::mat4(1.0f), m_PosA);
 		float time = (float)glfwGetTime();
 		for (unsigned int i = 0; i < m_Models.size(); i++) {
 
@@ -136,7 +134,13 @@ namespace test {
 	}
 
 	void MoveAround::OnImGuiRender() {
-		ImGui::Begin("Move around the scene with WASD keys.");
+		ImGui::Begin("Move Around!");
+		ImGui::SetWindowPos(ImVec2(430, 400));
+		
+		ImGui::Text("Use WASD keys to move around");
+		ImGui::Text("Use the mouse to look around"); 
+		ImGui::Text("Use the scroll wheel to zoom");
+
 		ImGui::End();
 	}
 

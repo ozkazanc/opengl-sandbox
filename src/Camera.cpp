@@ -13,7 +13,7 @@ Camera::Camera()
 	 m_Front(glm::vec3(0.0f, 0.0f, -1.0f)),
 	 m_MovementSpeed(SPEED),
 	 m_CurrentTime(0.0f), m_LastTime(0.0f), m_DeltaTime(0.0f),
-	 m_Yaw(YAW), m_Pitch(PITCH), m_MouseSensetivity(SENSITIVITY)
+	 m_Yaw(YAW), m_Pitch(PITCH), m_MouseSensetivity(SENSITIVITY), m_Zoom(ZOOM)
 {
 	UpdateCameraVectors();
 }
@@ -23,7 +23,7 @@ Camera::Camera(const glm::vec3& position, const glm::vec3& up)
 	 m_Front(glm::vec3(0.0f, 0.0f, -1.0f)),
 	 m_MovementSpeed(SPEED),
 	 m_CurrentTime(0.0f), m_LastTime(0.0f), m_DeltaTime(0.0f),
-	 m_Yaw(YAW), m_Pitch(PITCH), m_MouseSensetivity(SENSITIVITY)
+	 m_Yaw(YAW), m_Pitch(PITCH), m_MouseSensetivity(SENSITIVITY), m_Zoom(ZOOM)
 
 {
 	UpdateCameraVectors();
@@ -51,16 +51,20 @@ void Camera::OnNotify(int event_) {
 	if (event_ == GLFW_KEY_D) {
 		m_Position += m_Right * m_MovementSpeed * m_DeltaTime;
 	}
+	// We only take the xz component of Front vector so that we do not leave the ground(preventing looking up and flying up)
 	if (event_ == GLFW_KEY_S) {
-		m_Position -= m_Front * m_MovementSpeed * m_DeltaTime;
+		m_Position -= glm::vec3(m_Front.x, 0.0f, m_Front.z) * m_MovementSpeed * m_DeltaTime;
 	}
 	if (event_ == GLFW_KEY_W) {
-		m_Position += m_Front * m_MovementSpeed * m_DeltaTime;
+		m_Position += glm::vec3(m_Front.x, 0.0f, m_Front.z) * m_MovementSpeed * m_DeltaTime;
+
 	}
 }
 void Camera::OnNotify(float Xevent, float Yevent, bool scroll) {
 	if (!scroll)
-		MouseMovement(Xevent, Yevent);
+		ProcessMouseMovement(Xevent, Yevent);
+	else
+		ProcessMouseScroll(Yevent);
 }
 
 void Camera::SetDeltaTime(float time) {
@@ -73,7 +77,7 @@ glm::mat4 Camera::GetViewMatrix() {
 	return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
 }
 
-void Camera::MouseMovement(float xOffset, float yOffset) {
+void Camera::ProcessMouseMovement(float xOffset, float yOffset) {
 	xOffset *= m_MouseSensetivity;
 	yOffset *= m_MouseSensetivity;
 
@@ -88,5 +92,13 @@ void Camera::MouseMovement(float xOffset, float yOffset) {
 
 	UpdateCameraVectors();
 }
-
+void Camera::ProcessMouseScroll(float yoffset)
+{
+	if (m_Zoom >= 1.0f && m_Zoom <= 45.0f)
+		m_Zoom -= yoffset;
+	if (m_Zoom <= 1.0f)
+		m_Zoom = 1.0f;
+	if (m_Zoom >= 45.0f)
+		m_Zoom = 45.0f;
+}
 
