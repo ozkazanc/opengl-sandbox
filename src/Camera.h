@@ -25,6 +25,9 @@ private:
 	void UpdateCameraVectors();
 
 	const float m_MovementSpeed;
+	float m_Yaw;
+	float m_Pitch;
+	float m_MouseSensetivity;
 
 public:
 	Camera();
@@ -33,6 +36,8 @@ public:
 		
 	void SetDeltaTime(float time);
 	void OnNotify(int event_);
+	void OnNotify(float Xevent, float Yevent, bool scroll);
 
+	void MouseMovement(float xOffset, float yOffset);
 	glm::mat4 GetViewMatrix();
 };

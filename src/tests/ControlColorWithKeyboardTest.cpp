@@ -54,7 +54,7 @@ namespace test{
 		}
 	}
 	void ControlColorWithKeyboardTest::SetDeltaTime() {
-		m_CurrentTime = glfwGetTime();
+		m_CurrentTime = (float)glfwGetTime();
 		m_DeltaTime = m_CurrentTime - m_LastTime;
 		m_LastTime = m_CurrentTime;
 	}

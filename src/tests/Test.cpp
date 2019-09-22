@@ -17,8 +17,13 @@ namespace test {
 				m_CurrentTest = it.second();
 				m_Subject->RemoveObserver(this);
 				m_Subject->AddObserver(m_CurrentTest);
+				m_CurrentTest->SetWindow(m_Window);
+				m_CurrentTest->SetInputMouseInputMode();
 			}
 		}
+	}
+	void Test::SetWindow(GLFWwindow* window) {
+		m_Window = window;
 	}
 
 }

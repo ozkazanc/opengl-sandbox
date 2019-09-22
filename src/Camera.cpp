@@ -12,7 +12,8 @@ Camera::Camera()
 	 m_WorldUp(glm::vec3(0.0f, 1.0f, 0.0f)),
 	 m_Front(glm::vec3(0.0f, 0.0f, -1.0f)),
 	 m_MovementSpeed(SPEED),
-	 m_CurrentTime(0.0f), m_LastTime(0.0f), m_DeltaTime(0.0f)
+	 m_CurrentTime(0.0f), m_LastTime(0.0f), m_DeltaTime(0.0f),
+	 m_Yaw(YAW), m_Pitch(PITCH), m_MouseSensetivity(SENSITIVITY)
 {
 	UpdateCameraVectors();
 }
@@ -21,14 +22,20 @@ Camera::Camera(const glm::vec3& position, const glm::vec3& up)
 	 m_WorldUp(up),
 	 m_Front(glm::vec3(0.0f, 0.0f, -1.0f)),
 	 m_MovementSpeed(SPEED),
-	 m_CurrentTime(0.0f), m_LastTime(0.0f), m_DeltaTime(0.0f)
+	 m_CurrentTime(0.0f), m_LastTime(0.0f), m_DeltaTime(0.0f),
+	 m_Yaw(YAW), m_Pitch(PITCH), m_MouseSensetivity(SENSITIVITY)
+
 {
 	UpdateCameraVectors();
 }
 
 void Camera::UpdateCameraVectors() {
-	glm::vec3 front;
-
+	glm::vec3 front;	
+	front.x = cos(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));
+	front.y = sin(glm::radians(m_Pitch));
+	front.z = sin(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));
+	
+	m_Front = glm::normalize(front);
 	m_Right = glm::normalize(glm::cross(m_Front, m_WorldUp));
 	m_Up = glm::normalize(glm::cross(m_Right, m_Front));
 
@@ -51,6 +58,10 @@ void Camera::OnNotify(int event_) {
 		m_Position += m_Front * m_MovementSpeed * m_DeltaTime;
 	}
 }
+void Camera::OnNotify(float Xevent, float Yevent, bool scroll) {
+	if (!scroll)
+		MouseMovement(Xevent, Yevent);
+}
 
 void Camera::SetDeltaTime(float time) {
 	m_CurrentTime = time;
@@ -62,5 +73,20 @@ glm::mat4 Camera::GetViewMatrix() {
 	return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
 }
 
+void Camera::MouseMovement(float xOffset, float yOffset) {
+	xOffset *= m_MouseSensetivity;
+	yOffset *= m_MouseSensetivity;
+
+	m_Yaw += xOffset;
+	m_Pitch += yOffset;
+	
+	
+	if (m_Pitch > 89.0f)
+		m_Pitch = 89.0f;
+	else if (m_Pitch < -89.0f)
+		m_Pitch = -89.0f;
+
+	UpdateCameraVectors();
+}
 
 

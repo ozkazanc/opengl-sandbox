@@ -96,11 +96,17 @@ namespace test {
 
 		m_Camera = std::make_unique<Camera>();
 	}
-	MoveAround::~MoveAround() {}
+	MoveAround::~MoveAround() {
+		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+	void MoveAround::SetInputMouseInputMode() {
+		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	};
 
 	void MoveAround::OnUpdate(float deltaTime) {}
 
 	void MoveAround::OnRender() {
+
 		GLCall(glEnable(GL_DEPTH_TEST));
 		GLCall(glClear(GL_DEPTH_BUFFER_BIT));
 
@@ -127,7 +133,6 @@ namespace test {
 
 			renderer.Draw(*m_VertexArray, *m_IndexBuffer, *m_Shader);
 		}
-		
 	}
 
 	void MoveAround::OnImGuiRender() {
@@ -138,4 +143,9 @@ namespace test {
 	void MoveAround::OnNotify(int event_) {
 		m_Camera->OnNotify(event_);
 	}
+	void MoveAround::OnNotify(float Xevent, float Yevent, bool scroll) {
+		m_Camera->OnNotify(Xevent, Yevent, scroll);
+	}
+	
+
 }

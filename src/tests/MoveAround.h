@@ -14,6 +14,8 @@
 #include <memory>
 #include <vector>
 
+struct GLFWwindow;
+
 extern const int g_WindowWidth;
 extern const int g_WindowHeight;
 namespace test {
@@ -32,7 +34,7 @@ namespace test {
 		std::unique_ptr<Texture> m_Texture;
 
 		std::unique_ptr<Camera> m_Camera;
-
+		
 	public:
 		MoveAround();
 		~MoveAround();
@@ -40,8 +42,10 @@ namespace test {
 		void OnUpdate(float deltaTime) override;
 		void OnRender() override;
 		void OnImGuiRender() override;
+		void SetInputMouseInputMode() override;
 
 		void OnNotify(int event_) override;
+		void OnNotify(float Xevent, float Yevent, bool scroll) override;
 
 	};
 

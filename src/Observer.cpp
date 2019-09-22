@@ -31,3 +31,10 @@ void Subject::Notify(int event_) const{
 		current = current->m_Next;
 	}
 }
+void Subject::Notify(float event_, float Yevent, bool scroll) const {
+	Observer* current = m_Head;
+	while (current != nullptr) {
+		current->OnNotify(event_, Yevent, scroll);
+		current = current->m_Next;
+	}
+}

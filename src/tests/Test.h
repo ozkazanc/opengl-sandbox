@@ -7,11 +7,13 @@
 
 #include "Observer.h"
 
+struct GLFWwindow;
 namespace test{
 
 	class Test :public Observer {
 	protected:
 		Subject* m_Subject;
+		GLFWwindow* m_Window;
 	public:
 		Test() :m_Subject(nullptr) {}
 		virtual ~Test() {}
@@ -19,8 +21,12 @@ namespace test{
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnRender() {}
 		virtual void OnImGuiRender() {}
+		virtual void SetInputMouseInputMode() {}
 
 		virtual void OnNotify(int event_) {}
+		virtual void OnNotify(float Xevent, float Yevent, bool scroll) {}
+		
+		void SetWindow(GLFWwindow* window);
 	};
 
 	class TestMenu : public Test {

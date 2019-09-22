@@ -23,10 +23,14 @@ void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void GLFWKeyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods);
 void ProcessInput(GLFWwindow* window);
+void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 
 const int g_WindowWidth = 640;
 const int g_WindowHeight = 480;
 static HandleInput *gp_InputHandler = new HandleInput();
+bool gb_FirstMouse = true;
+float gf_LastX = 320.0f;
+float gf_LastY = 240.0f;
 int main(void)
 {
 	GLFWwindow* window;
@@ -51,7 +55,8 @@ int main(void)
 	}
 	glfwSetFramebufferSizeCallback(window, GLFWFramebufferSizeCallback);
 	//glfwSetKeyCallback(window, GLFWKeyCallbackWrapper);
-	
+	glfwSetCursorPosCallback(window, MouseCallback);
+
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 	
@@ -93,7 +98,6 @@ int main(void)
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 			
-		
 		p_CurrentTest->OnUpdate(0.0f);
 		p_CurrentTest->OnRender();
 		
@@ -104,6 +108,7 @@ int main(void)
 		}
 				
 		p_CurrentTest->OnImGuiRender();
+		p_CurrentTest->SetWindow(window);
 		
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -165,4 +170,24 @@ static void ProcessInput(GLFWwindow* window)
 	
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		gp_InputHandler->GLFWKeyCallback(window, GLFW_KEY_D, -1, GLFW_PRESS, -1);
+}
+void MouseCallback(GLFWwindow* window, double xPos, double yPos)
+{
+	float xPos_ = (float)xPos;
+	float yPos_ = (float)yPos;
+	if (gb_FirstMouse)
+	{
+		gf_LastX = xPos_;
+		gf_LastY = yPos_;
+		gb_FirstMouse = false;
+	}
+
+	float xOffset = xPos_ - gf_LastX;
+	float yOffset = gf_LastY - yPos_; // reversed since y-coordinates go from bottom to top
+
+	gf_LastX = xPos_;
+	gf_LastY = yPos_;
+
+	gp_InputHandler->MouseCallback(xOffset, yOffset, false);
+	//camera.ProcessMouseMovement(xOffset, yOffset);
 }

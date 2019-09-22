@@ -14,6 +14,7 @@ public:
 	virtual ~Observer() {}
 
 	virtual void OnNotify(int event_) = 0;
+	virtual void OnNotify(float Xevent, float Yevent, bool scroll) = 0;
 };
 
 class Subject{
@@ -22,6 +23,7 @@ private:
 
 protected:
 	void Notify(int event_) const;
+	void Notify(float Xevent_, float Yevent, bool scroll) const;
 
 public:
 	Subject()
