@@ -12,6 +12,8 @@ namespace test {
 	TestMenu::~TestMenu() {}
 
 	void TestMenu::OnImGuiRender(){
+		ImGui::SetWindowPos(ImVec2(g_WindowWidth - 170.0f, 0.0f));
+		ImGui::SetWindowSize(ImVec2(170.0f, 200.0f));
 		for (auto& it : m_Tests){
 			if (ImGui::Button(it.first.c_str())){
 				m_CurrentTest = it.second();

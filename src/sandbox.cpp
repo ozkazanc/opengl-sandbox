@@ -19,6 +19,8 @@
 #include "tests/ControlColorWithKeyboardTest.h"
 #include "tests/MoveAround.h"
 
+#include "tests/BasicLight.h"
+
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void GLFWKeyCallbackWrapper(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -88,8 +90,13 @@ int main(void)
 	p_TestMenu->RegisterTest<test::Texture3DTest>("3D Rotating Cube");
 	p_TestMenu->RegisterTest<test::Multiple3DModels>("Multiple 3D Models");
 	p_TestMenu->RegisterTest<test::MoveAround>("Move Camera");
+	p_TestMenu->RegisterTest<test::BasicLight>("Basic Lighting");
 
 	Renderer renderer;
+	float fLastTime = 0.0f;
+	float fCurrentTime = 0.0f;
+	float fDeltaTime = 0.0f;
+
 	while (!glfwWindowShouldClose(window))
 	{
 		ProcessInput(window, p_CurrentTest, p_TestMenu);
@@ -100,7 +107,11 @@ int main(void)
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 			
-		p_CurrentTest->OnUpdate(0.0f);
+		fCurrentTime = (float)glfwGetTime();
+		fDeltaTime = fCurrentTime - fLastTime;
+		fLastTime = fCurrentTime;
+
+		p_CurrentTest->OnUpdate(fDeltaTime);
 		p_CurrentTest->OnRender();
 		
 		if (p_CurrentTest != p_TestMenu && ImGui::Button("<- Back to Menu (TAB)")){

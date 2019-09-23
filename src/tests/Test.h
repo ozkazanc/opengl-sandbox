@@ -7,6 +7,9 @@
 
 #include "Observer.h"
 
+extern const int g_WindowWidth;
+extern const int g_WindowHeight;
+
 struct GLFWwindow;
 namespace test{
 

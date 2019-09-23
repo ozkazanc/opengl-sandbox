@@ -8,7 +8,7 @@
 #define GLFW_KEY_W                  87
 
 Camera::Camera() 
-	:m_Position(glm::vec3(0.0f, 0.0f, 0.0f)),
+	:m_Position(glm::vec3(0.0f, 0.0f, 5.0f)),
 	 m_WorldUp(glm::vec3(0.0f, 1.0f, 0.0f)),
 	 m_Front(glm::vec3(0.0f, 0.0f, -1.0f)),
 	 m_MovementSpeed(SPEED),
@@ -53,12 +53,12 @@ void Camera::OnNotify(int event_) {
 	}
 	// We only take the xz component of Front vector so that we do not leave the ground(preventing looking up and flying up)
 	if (event_ == GLFW_KEY_S) {
-		m_Position -= glm::vec3(m_Front.x, 0.0f, m_Front.z) * m_MovementSpeed * m_DeltaTime;
+		m_Position -= m_Front * m_MovementSpeed * m_DeltaTime;
 	}
 	if (event_ == GLFW_KEY_W) {
-		m_Position += glm::vec3(m_Front.x, 0.0f, m_Front.z) * m_MovementSpeed * m_DeltaTime;
-
+		m_Position += m_Front * m_MovementSpeed * m_DeltaTime;
 	}
+	//m_Front.y = 0.0f; // Uncomment if we want to keep the camera on the xz-axis. Similar to an actual FPS camera
 }
 void Camera::OnNotify(float Xevent, float Yevent, bool scroll) {
 	if (!scroll)
