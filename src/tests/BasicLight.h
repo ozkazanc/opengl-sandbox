@@ -24,6 +24,7 @@ namespace test {
 	{
 	private:
 		glm::mat4 m_Proj, m_View, m_Model;
+		glm::vec3 m_LightPos;
 
 		std::unique_ptr<VertexBuffer> m_VertexBuffer;
 		std::unique_ptr<VertexBufferLayout> m_VertexLayout;
