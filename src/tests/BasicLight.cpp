@@ -130,12 +130,19 @@ namespace test {
 		m_LightingShader->SetUniformMat4f("u_View", m_View);
 		m_LightingShader->SetUniformMat4f("u_Model", m_Model);
 
-		m_LightingShader->SetUniform3f("u_LightColor", 1.0f, 1.0f, 1.0f);
-		m_LightingShader->SetUniform3f("u_ObjectColor", 1.0f, 0.5f, 0.31f);
-		m_LightingShader->SetUniform3f("u_LightPosition", m_LightPos.x, m_LightPos.y, m_LightPos.z);
-
+		m_LightingShader->SetUniform3f("u_Material.ambient", 1.0f, 0.5f, 0.31f);
+		m_LightingShader->SetUniform3f("u_Material.diffuse", 1.0f, 0.5f, 0.31f);
+		m_LightingShader->SetUniform3f("u_Material.specular", 0.5f, 0.5f, 0.5f);
+		m_LightingShader->SetUniform1f("u_Material.shininess", 32.0f);
+						  
+		m_LightingShader->SetUniform3f("u_Light.specular", 1.0f, 1.0f, 1.0f);
+		m_LightingShader->SetUniform3f("u_Light.ambient", 0.2f, 0.2f, 0.2f);
+		m_LightingShader->SetUniform3f("u_Light.diffuse", 0.5f, 0.5f, 0.5f);
+		m_LightingShader->SetUniform3f("u_Light.position", m_LightPos.x, m_LightPos.y, m_LightPos.z);
+		
 		glm::vec3 cameraPosition = m_Camera->GetCameraPosition();
 		m_LightingShader->SetUniform3f("u_ViewPosition", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
 
 		renderer.Draw(*m_VertexArray, *m_IndexBuffer, *m_LightingShader);
 	
