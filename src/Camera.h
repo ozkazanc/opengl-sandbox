@@ -44,5 +44,6 @@ public:
 
 	glm::mat4 GetViewMatrix();
 	
+	inline glm::vec3 GetCameraPosition() const { return m_Position; }
 	inline float GetZoom() const { return m_Zoom; }
 };

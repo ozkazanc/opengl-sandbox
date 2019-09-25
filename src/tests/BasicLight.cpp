@@ -114,6 +114,7 @@ namespace test {
 		float fCurrentTime = (float)glfwGetTime();
 		m_Camera->SetDeltaTime(fCurrentTime);
 
+		// Rotate the light source
 		m_LightPos.x = sin(glm::radians(fCurrentTime * 30.0f)) * 2.0f;
 		m_LightPos.z = cos(glm::radians(fCurrentTime * 30.0f)) * 1.5f;
 
@@ -133,12 +134,13 @@ namespace test {
 		m_LightingShader->SetUniform3f("u_ObjectColor", 1.0f, 0.5f, 0.31f);
 		m_LightingShader->SetUniform3f("u_LightPosition", m_LightPos.x, m_LightPos.y, m_LightPos.z);
 
+		glm::vec3 cameraPosition = m_Camera->GetCameraPosition();
+		m_LightingShader->SetUniform3f("u_ViewPosition", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
 		renderer.Draw(*m_VertexArray, *m_IndexBuffer, *m_LightingShader);
 	
 		// Light Source
 		m_Model = 
-			//glm::rotate(glm::mat4(1.0f), glm::radians((float)glfwGetTime() * 50.0f), glm::vec3(0.0f, 1.0f, 0.0f))
-			//* 
 			glm::translate(glm::mat4(1.0f), m_LightPos)
 			* 
 			glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
