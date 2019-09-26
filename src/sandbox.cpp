@@ -20,6 +20,7 @@
 #include "tests/MoveAround.h"
 
 #include "tests/BasicLight.h"
+#include "tests/LightingMap.h"
 
 void GLFWErrorCallback(int error, const char* msg);
 void GLFWFramebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -91,6 +92,7 @@ int main(void)
 	p_TestMenu->RegisterTest<test::Multiple3DModels>("Multiple 3D Models");
 	p_TestMenu->RegisterTest<test::MoveAround>("Move Camera");
 	p_TestMenu->RegisterTest<test::BasicLight>("Basic Lighting");
+	p_TestMenu->RegisterTest<test::LightingMap>("Texture Lighting");
 
 	Renderer renderer;
 	float fLastTime = 0.0f;
